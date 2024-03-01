@@ -173,7 +173,11 @@ func (enc *Encoder) sendType(w io.Writer, state *encoderState, origt reflect.Typ
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to Encoder will panic, as they cannot be transmitted by gob.
 func (enc *Encoder) Encode(e any) error {
-	return enc.EncodeValue(reflect.ValueOf(e))
+	v := reflect.ValueOf(e)
+	if v.Type() == reflect.TypeOf(reflect.Value{}) {
+		v = e.(reflect.Value)
+	}
+	return enc.EncodeValue(v)
 }
 
 // sendTypeDescriptor makes sure the remote side knows about this type.
