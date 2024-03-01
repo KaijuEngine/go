@@ -386,6 +386,11 @@ func (enc *Encoder) encodeInterface(b *encBuffer, iv reflect.Value) {
 	// Gobs can encode nil interface values but not typed interface
 	// values holding nil pointers, since nil pointers point to no value.
 	elem := iv.Elem()
+	typ := elem.Type()
+	if typ == reflect.TypeOf(reflect.Value{}) {
+		elem = iv.Interface().(reflect.Value).Elem()
+		typ = elem.Type()
+	}
 	if elem.Kind() == reflect.Pointer && elem.IsNil() {
 		errorf("gob: cannot encode nil pointer of type %s inside interface", iv.Elem().Type())
 	}
@@ -397,7 +402,7 @@ func (enc *Encoder) encodeInterface(b *encBuffer, iv reflect.Value) {
 		return
 	}
 
-	ut := userType(iv.Elem().Type())
+	ut := userType(typ)
 	namei, ok := concreteTypeToName.Load(ut.base)
 	if !ok {
 		errorf("type not registered for interface: %s", ut.base)

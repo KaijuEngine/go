@@ -827,6 +827,14 @@ var (
 	concreteTypeToName sync.Map // map[reflect.Type]string
 )
 
+// UnRegisterName will remove a previously registered from the gob registry.
+func UnRegisterName(name string) {
+	if found, ok := nameToConcreteType.Load(name); ok {
+		nameToConcreteType.Delete(name)
+		concreteTypeToName.Delete(found)
+	}
+}
+
 // RegisterName is like [Register] but uses the provided name rather than the
 // type's default.
 func RegisterName(name string, value any) {
@@ -835,13 +843,19 @@ func RegisterName(name string, value any) {
 		panic("attempt to register empty name")
 	}
 
-	ut := userType(reflect.TypeOf(value))
+	RegisterNamedType(name, reflect.TypeOf(value))
+}
+
+// RegisterName is like [RegisterName] but uses a reflected type rather than
+// passing to an interface{}.
+func RegisterNamedType(name string, typ reflect.Type) {
+	ut := userType(typ)
 
 	// Check for incompatible duplicates. The name must refer to the
 	// same user type, and vice versa.
 
 	// Store the name and type provided by the user....
-	if t, dup := nameToConcreteType.LoadOrStore(name, reflect.TypeOf(value)); dup && t != ut.user {
+	if t, dup := nameToConcreteType.LoadOrStore(name, typ); dup && t != ut.user {
 		panic(fmt.Sprintf("gob: registering duplicate types for %q: %s != %s", name, t, ut.user))
 	}
 
