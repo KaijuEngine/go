@@ -747,7 +747,15 @@ OverlayLoop:
 			}
 			sfiles, gccfiles = filter(sfiles, sfiles[:0], gccfiles)
 		} else {
-			for _, sfile := range sfiles {
+			gosFiles := []string{}
+			for i := 0; i < len(sfiles); i++ {
+				sfile := sfiles[i]
+				if filepath.Ext(sfile) == ".asm" {
+					gosFiles = append(gosFiles, sfile)
+					sfiles = append(sfiles[:i], sfiles[i+1:]...)
+					i--
+					continue
+				}
 				data, err := os.ReadFile(filepath.Join(p.Dir, sfile))
 				if err == nil {
 					if bytes.HasPrefix(data, []byte("TEXT")) || bytes.Contains(data, []byte("\nTEXT")) ||
@@ -757,8 +765,9 @@ OverlayLoop:
 					}
 				}
 			}
+
 			gccfiles = append(gccfiles, sfiles...)
-			sfiles = nil
+			sfiles = gosFiles
 		}
 
 		outGo, outObj, err := b.cgo(a, base.Tool("cgo"), objdir, pcCFLAGS, pcLDFLAGS, mkAbsFiles(p.Dir, cgofiles), gccfiles, cxxfiles, p.MFiles, p.FFiles)

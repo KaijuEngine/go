@@ -894,7 +894,7 @@ Found:
 		switch ext {
 		case ".go":
 			// keep going
-		case ".S", ".sx":
+		case ".S", ".sx", ".asm":
 			// special case for cgo, handled at end
 			Sfiles = append(Sfiles, name)
 			continue
@@ -1071,7 +1071,7 @@ func fileListForExt(p *Package, ext string) *[]string {
 		return &p.HFiles
 	case ".f", ".F", ".for", ".f90":
 		return &p.FFiles
-	case ".s", ".S", ".sx":
+	case ".s", ".S", ".sx", ".asm":
 		return &p.SFiles
 	case ".swig":
 		return &p.SwigFiles

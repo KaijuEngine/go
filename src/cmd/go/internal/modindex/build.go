@@ -252,7 +252,7 @@ func fileListForExt(p *build.Package, ext string) *[]string {
 		return &p.HFiles
 	case ".f", ".F", ".for", ".f90":
 		return &p.FFiles
-	case ".s", ".S", ".sx":
+	case ".s", ".S", ".sx", ".asm":
 		return &p.SFiles
 	case ".swig":
 		return &p.SwigFiles
